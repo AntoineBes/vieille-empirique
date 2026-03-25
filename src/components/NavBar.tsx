@@ -5,7 +5,7 @@ import { useState } from "react";
 const NAV_LINKS = [
   { href: "/documents", label: "Documents" },
   { href: "/statistiques", label: "Statistiques" },
-  { href: "/api/documents", label: "API", mono: true },
+  { href: "/documentation", label: "Documentation" },
 ];
 
 export function NavBar() {
@@ -31,7 +31,7 @@ export function NavBar() {
             <a
               key={link.href}
               href={link.href}
-              className={`text-sm link-subtle ${link.mono ? "font-mono text-xs text-ink-400" : ""}`}
+              className="text-sm link-subtle"
             >
               {link.label}
             </a>
@@ -64,7 +64,7 @@ export function NavBar() {
               <a
                 key={link.href}
                 href={link.href}
-                className={`text-sm link-subtle ${link.mono ? "font-mono text-xs text-ink-400" : ""}`}
+                className="text-sm link-subtle"
                 onClick={() => setMenuOpen(false)}
               >
                 {link.label}

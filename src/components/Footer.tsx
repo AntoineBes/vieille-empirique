@@ -19,7 +19,7 @@ export function Footer() {
               <li><a href="/" className="link-subtle">Accueil</a></li>
               <li><a href="/documents" className="link-subtle">Documents</a></li>
               <li><a href="/statistiques" className="link-subtle">Statistiques</a></li>
-              <li><a href="/api/documents" className="link-subtle font-mono text-xs">API publique</a></li>
+              <li><a href="/documentation" className="link-subtle">Documentation</a></li>
             </ul>
           </div>
 
@@ -33,6 +33,11 @@ export function Footer() {
               <li><a href="https://www.data.gouv.fr" target="_blank" rel="noopener noreferrer" className="link-subtle">data.gouv.fr</a></li>
               <li><a href="https://www.oecd.org" target="_blank" rel="noopener noreferrer" className="link-subtle">OCDE</a></li>
             </ul>
+
+            <p className="font-mono text-xs uppercase tracking-wider text-ink-400 mb-3 mt-6">Projet associé</p>
+            <a href="https://empirisme-citoyen.fr" target="_blank" rel="noopener noreferrer" className="link-subtle text-sm font-medium">
+              empirisme-citoyen.fr
+            </a>
           </div>
         </div>
 
