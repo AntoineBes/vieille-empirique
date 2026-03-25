@@ -1,0 +1,33 @@
+name: Fetch — OCDE
+
+on:
+  schedule:
+    # Chaque mercredi à 10h00 UTC (publications OCDE en milieu de semaine)
+    - cron: "0 10 * * 3"
+  workflow_dispatch:
+
+jobs:
+  fetch:
+    name: Sync OCDE
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Run OCDE connector
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
+        run: npx tsx src/scripts/run-connector.ts ocde

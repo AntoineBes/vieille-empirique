@@ -1,0 +1,33 @@
+name: Fetch — Banque de France
+
+on:
+  schedule:
+    # Chaque lundi à 09h00 UTC (publications hebdomadaires BdF)
+    - cron: "0 9 * * 1"
+  workflow_dispatch:
+
+jobs:
+  fetch:
+    name: Sync Banque de France
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Run Banque de France connector
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
+        run: npx tsx src/scripts/run-connector.ts banque-de-france

@@ -1,0 +1,33 @@
+name: Fetch — INSEE
+
+on:
+  schedule:
+    # Tous les jours à 06h00 UTC (publications INSEE le matin)
+    - cron: "0 6 * * *"
+  workflow_dispatch: # Déclenchement manuel possible
+
+jobs:
+  fetch:
+    name: Sync INSEE
+    runs-on: ubuntu-latest
+    timeout-minutes: 10 # Max par run, budget free tier préservé
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Run INSEE connector
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
+        run: npx tsx src/scripts/run-connector.ts insee

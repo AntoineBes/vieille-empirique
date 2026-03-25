@@ -1,0 +1,101 @@
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-ink-50 text-ink-900 font-sans;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-serif;
+  }
+
+  ::selection {
+    @apply bg-accent-economie/20 text-ink-900;
+  }
+}
+
+@layer components {
+  /* Conteneur principal de lecture */
+  .container-content {
+    @apply max-w-content mx-auto px-4;
+  }
+
+  .container-wide {
+    @apply max-w-wide mx-auto px-4;
+  }
+
+  /* Séparateur éditorial (1px comme empirisme-citoyen) */
+  .divider {
+    @apply border-t border-ink-200;
+  }
+
+  /* Badge catégorie avec bordure gauche colorée */
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 text-xs font-mono font-medium uppercase tracking-wider;
+  }
+
+  .badge-droit {
+    @apply badge border-l-2 border-accent-droit bg-accent-droit/10 text-accent-droit;
+  }
+
+  .badge-economie {
+    @apply badge border-l-2 border-accent-economie bg-accent-economie/10 text-accent-economie;
+  }
+
+  .badge-politique {
+    @apply badge border-l-2 border-accent-politique bg-accent-politique/10 text-accent-politique;
+  }
+
+  .badge-europe {
+    @apply badge border-l-2 border-accent-europe bg-accent-europe/10 text-accent-europe;
+  }
+
+  .badge-societe {
+    @apply badge border-l-2 border-accent-societe bg-accent-societe/10 text-accent-societe;
+  }
+
+  /* Numérotation séquentielle (01, 02, ...) */
+  .num-badge {
+    @apply font-mono text-xs text-ink-400 tabular-nums;
+  }
+
+  /* Date en monospace majuscule */
+  .date-label {
+    @apply font-mono text-xs uppercase tracking-wide text-ink-500;
+  }
+
+  /* Skeleton loading */
+  .skeleton {
+    @apply animate-pulse bg-ink-200 rounded;
+  }
+
+  /* Lien discret éditorial */
+  .link-subtle {
+    @apply text-ink-600 hover:text-ink-900 transition-colors duration-200;
+  }
+
+  /* Card avec hover élégant */
+  .card {
+    @apply bg-white border border-ink-200 transition-all duration-200;
+  }
+
+  .card:hover {
+    @apply border-ink-300 shadow-sm;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}

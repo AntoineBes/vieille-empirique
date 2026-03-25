@@ -1,0 +1,180 @@
+// Veille Empirique — Prisma Schema
+// PostgreSQL via Neon (free tier)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ─────────────────────────────────────────
+// Énumérations
+// ─────────────────────────────────────────
+
+enum Categorie {
+  DROIT
+  ECONOMIE
+  POLITIQUE
+  EUROPE
+  SOCIETE
+}
+
+enum SousCategorie {
+  // DROIT
+  JURISPRUDENCE
+  LEGISLATION
+  REGLEMENTATION
+  DROIT_CONSTITUTIONNEL
+  DROIT_SOCIAL
+  DROIT_FISCAL
+
+  // ECONOMIE
+  FINANCES_PUBLIQUES
+  MARCHE_DU_TRAVAIL
+  INFLATION_PRIX
+  COMMERCE_EXTERIEUR
+  POLITIQUE_MONETAIRE
+  CONJONCTURE
+
+  // POLITIQUE
+  POLITIQUES_PUBLIQUES
+  ELECTIONS
+  INSTITUTIONS
+  REFORME_ETAT
+
+  // EUROPE
+  LEGISLATION_EU
+  FONDS_EU
+  TRAITES
+  EUROSTAT
+
+  // SOCIÉTÉ
+  DEMOGRAPHIE
+  EDUCATION
+  SANTE
+  LOGEMENT
+  PAUVRETE_EXCLUSION
+  ENVIRONNEMENT
+}
+
+enum TypeDocument {
+  // Légifrance
+  LOI
+  DECRET
+  ORDONNANCE
+  ARRETE
+  CIRCULAIRE
+  QPC
+  DECISION_CC
+  DECISION_CE
+  DECISION_CASS
+
+  // INSEE / Stats
+  PUBLICATION_STATISTIQUE
+  INDICATEUR
+  ENQUETE
+  RAPPORT
+
+  // data.gouv.fr
+  JEU_DE_DONNEES
+  RESSOURCE
+
+  // Banque de France
+  BULLETIN
+  PROJECTION
+  ETUDE
+
+  // OCDE
+  COMPARAISON_INTERNATIONALE
+
+  // Générique
+  AUTRE
+}
+
+enum Institution {
+  LEGIFRANCE
+  INSEE
+  BANQUE_DE_FRANCE
+  DATA_GOUV
+  COUR_DES_COMPTES
+  DARES
+  OCDE
+  CONSEIL_CONSTITUTIONNEL
+  CONSEIL_ETAT
+  COUR_DE_CASSATION
+  MINISTERE_ECONOMIE
+  MINISTERE_TRAVAIL
+  AUTRE
+}
+
+enum StatutSync {
+  OK
+  ERREUR
+  PARTIEL
+}
+
+// ─────────────────────────────────────────
+// Table principale : documents
+// ─────────────────────────────────────────
+
+model Document {
+  id            String        @id @default(cuid())
+
+  // Identification
+  titre         String
+  institution   Institution
+  type          TypeDocument
+  categorie     Categorie
+  sous_categorie SousCategorie?
+
+  // Contenu
+  resume        String?       @db.Text
+  url           String        // URL vers la source officielle
+  source_id     String        // Identifiant dans l'API d'origine
+
+  // Dates
+  date_publication DateTime
+  cree_le          DateTime  @default(now())
+  mis_a_jour_le    DateTime  @updatedAt
+
+  // Métadonnées supplémentaires (flexible)
+  metadata      Json?
+
+  // Contrainte de déduplication
+  @@unique([source_id, institution])
+
+  // Index de recherche et filtrage
+  @@index([categorie])
+  @@index([institution])
+  @@index([type])
+  @@index([date_publication(sort: Desc)])
+  @@index([cree_le(sort: Desc)])
+
+  @@map("documents")
+}
+
+// ─────────────────────────────────────────
+// Table de suivi des synchronisations
+// ─────────────────────────────────────────
+
+model SyncLog {
+  id          String      @id @default(cuid())
+  institution Institution
+  statut      StatutSync
+  documents_trouves  Int  @default(0)
+  documents_inseres  Int  @default(0)
+  documents_mis_a_jour Int @default(0)
+  erreur      String?     @db.Text
+  duree_ms    Int?
+  demarre_le  DateTime    @default(now())
+  termine_le  DateTime?
+
+  @@index([institution])
+  @@index([demarre_le(sort: Desc)])
+
+  @@map("sync_logs")
+}
