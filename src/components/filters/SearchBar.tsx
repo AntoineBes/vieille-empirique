@@ -2,7 +2,7 @@
 
 export function SearchBar({ defaultValue }: { defaultValue?: string }) {
   return (
-    <div className="flex flex-col gap-1.5 flex-1 min-w-52">
+    <div className="flex flex-col gap-1.5">
       <label htmlFor="search-q" className="font-mono text-xs uppercase tracking-wider text-ink-400">
         Recherche
       </label>

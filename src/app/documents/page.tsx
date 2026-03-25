@@ -77,9 +77,9 @@ export default async function DocumentsPage({
   const hasFilters = Object.values(searchParams).some((v) => v && v.trim());
 
   return (
-    <div className="container-wide py-10">
+    <div className="container-wide px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
       <h1 className="font-serif text-heading text-ink-900 mb-2">Documents</h1>
-      <p className="text-sm text-ink-500 mb-8">
+      <p className="text-sm text-ink-500 mb-6 sm:mb-8">
         Explorez les publications officielles françaises par catégorie, institution, type ou date.
       </p>
 

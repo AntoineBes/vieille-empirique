@@ -31,6 +31,10 @@ export const metadata: Metadata = {
   description:
     "Agrégateur de métadonnées de publications officielles françaises : lois, décrets, statistiques, rapports publics. Sources ouvertes, données publiques.",
   metadataBase: new URL(process.env.NEXT_PUBLIC_URL ?? "https://veille.empirisme-citoyen.fr"),
+  icons: {
+    icon: "/ve-logo.svg",
+    apple: "/ve-logo.svg",
+  },
   openGraph: {
     type: "website",
     locale: "fr_FR",

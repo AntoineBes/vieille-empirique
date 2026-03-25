@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 
 const NAV_LINKS = [
   { href: "/documents", label: "Documents" },
@@ -21,8 +22,10 @@ export function NavBar() {
       </a>
 
       <nav className="container-wide py-3 flex items-center justify-between" aria-label="Navigation principale">
-        <a href="/" className="font-serif text-lg font-semibold tracking-tight">
-          Veille <span className="text-accent-economie">Empirique</span>
+        <a href="/" className="flex items-center gap-2 font-serif text-lg font-semibold tracking-tight">
+          <Image src="/ve-logo.svg" alt="Logo Veille Empirique" width={28} height={28} className="shrink-0" />
+          <span className="hidden sm:inline">Veille <span className="text-accent-economie">Empirique</span></span>
+          <span className="sm:hidden text-accent-economie">VE</span>
         </a>
 
         {/* Desktop nav */}

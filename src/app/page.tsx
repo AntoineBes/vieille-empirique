@@ -50,27 +50,27 @@ export default async function HomePage() {
     <div>
       {/* Hero éditorial */}
       <section className="bg-white border-b border-ink-200">
-        <div className="container-wide py-16 md:py-24">
+        <div className="container-wide px-4 sm:px-6 lg:px-8 py-10 sm:py-16 md:py-24">
           <h1 className="font-serif text-display text-ink-900 text-balance max-w-2xl">
             Veille Empirique
           </h1>
-          <p className="font-serif text-lg italic text-ink-500 mt-3">
+          <p className="font-serif text-base sm:text-lg italic text-ink-500 mt-2 sm:mt-3">
             pour y voir plus clair
           </p>
-          <p className="text-ink-600 mt-6 max-w-xl leading-relaxed">
+          <p className="text-sm sm:text-base text-ink-600 mt-4 sm:mt-6 max-w-xl leading-relaxed">
             Agrégateur de métadonnées de publications officielles françaises.
             Lois, décrets, statistiques, rapports — indexés quotidiennement
             depuis les APIs publiques.
           </p>
 
           {/* Compteur global */}
-          <div className="mt-8 flex items-center gap-6">
+          <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
             <div>
-              <p className="text-3xl font-serif font-bold text-ink-900">{formatNumber(totalDocuments)}</p>
+              <p className="text-2xl sm:text-3xl font-serif font-bold text-ink-900">{formatNumber(totalDocuments)}</p>
               <p className="font-mono text-xs uppercase tracking-wider text-ink-400 mt-1">documents indexés</p>
             </div>
             {lastSync?.termine_le && (
-              <div className="pl-6 border-l border-ink-200">
+              <div className="sm:pl-6 sm:border-l border-ink-200">
                 <p className="font-mono text-xs text-ink-400">Dernière synchronisation</p>
                 <p className="text-sm text-ink-600 mt-0.5">
                   {new Date(lastSync.termine_le).toLocaleDateString("fr-FR", {
@@ -88,9 +88,9 @@ export default async function HomePage() {
       </section>
 
       {/* Stats par catégorie */}
-      <section className="container-wide py-12">
-        <h2 className="font-mono text-xs uppercase tracking-wider text-ink-400 mb-5">Par catégorie</h2>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+      <section className="container-wide px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <h2 className="font-mono text-xs uppercase tracking-wider text-ink-400 mb-4 sm:mb-5">Par catégorie</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 sm:gap-3">
           {countsByCategorie.map((c) => (
             <StatsBadge key={c.categorie} label={c.categorie} count={c._count.id} />
           ))}
@@ -98,14 +98,14 @@ export default async function HomePage() {
       </section>
 
       {/* Institutions */}
-      <section className="container-wide pb-10">
+      <section className="container-wide px-4 sm:px-6 lg:px-8 pb-8 sm:pb-10">
         <h2 className="font-mono text-xs uppercase tracking-wider text-ink-400 mb-4">Par institution</h2>
         <div className="flex flex-wrap gap-2">
           {countsByInstitution.map((i) => (
             <a
               key={i.institution}
               href={`/documents?institution=${i.institution}`}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-ink-200 rounded-md text-sm text-ink-700 hover:border-ink-300 hover:bg-ink-50 transition"
+              className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-white border border-ink-200 rounded-md text-xs sm:text-sm text-ink-700 hover:border-ink-300 hover:bg-ink-50 transition"
             >
               {INSTITUTION_LABELS[i.institution] ?? i.institution}
               <span className="font-mono text-xs text-ink-400">({formatNumber(i._count.id)})</span>
@@ -115,8 +115,8 @@ export default async function HomePage() {
       </section>
 
       {/* Documents récents */}
-      <section className="container-wide pb-16">
-        <div className="flex items-center justify-between mb-6">
+      <section className="container-wide px-4 sm:px-6 lg:px-8 pb-12 sm:pb-16">
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
           <h2 className="font-serif text-heading text-ink-900">Publications récentes</h2>
           <a href="/documents" className="text-sm text-accent-economie hover:underline inline-flex items-center gap-1">
             Voir tout
