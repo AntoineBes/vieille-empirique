@@ -99,7 +99,7 @@ export class OcdeConnector extends BaseConnector {
         sous_categorie,
         url: `https://data-explorer.oecd.org/vis?df[ds]=DisseminateFinalDMZ&df[id]=${df.id}&df[ag]=OECD`,
         date_publication: new Date(),
-        metadata: { dataflowId: df.id, agencyId: df.agencyId, version: df.version, sdmxId: fullId },
+        metadata: { dataflowId: df.id, agencyId: df.agencyId, version: df.version, sdmxId: fullId, date_type: "sync" },
       };
     });
 

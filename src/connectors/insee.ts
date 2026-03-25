@@ -159,11 +159,12 @@ export class InseeConnector extends BaseConnector {
           sous_categorie,
           resume: df.nameEn ? `${df.nameEn}${seriesInfo}` : seriesInfo.trim() || undefined,
           url: df.url,
-          date_publication: new Date(), // Les dataflows n'ont pas de date de publication, on prend la date de sync
+          date_publication: new Date(),
           metadata: {
             dataflowId: df.id,
             nameEn: df.nameEn,
             seriesCount: df.seriesCount,
+            date_type: "sync", // Pas de date de publication disponible via le catalogue BDM
           },
         });
       }

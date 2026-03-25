@@ -14,6 +14,9 @@ interface DocumentCardProps {
 
 export function DocumentCard({ document: doc, index }: DocumentCardProps) {
   const badgeClass = CATEGORIE_BADGE_CLASS[doc.categorie] ?? "badge";
+  const meta = doc.metadata as Record<string, unknown> | null;
+  const isSyncDate = meta?.date_type === "sync";
+  const datePrefix = isSyncDate ? "Indexé le " : "";
 
   return (
     <article className="card rounded-none border-x-0 border-t-0 py-4 sm:py-5 px-0 group">
@@ -60,7 +63,7 @@ export function DocumentCard({ document: doc, index }: DocumentCardProps) {
           {/* Date + lien source — en ligne sous le titre sur mobile */}
           <div className="flex items-center gap-3 mt-2 sm:hidden">
             <time className="date-label" dateTime={new Date(doc.date_publication).toISOString()}>
-              {formatDate(doc.date_publication)}
+              {datePrefix}{formatDate(doc.date_publication)}
             </time>
             <a
               href={doc.url}

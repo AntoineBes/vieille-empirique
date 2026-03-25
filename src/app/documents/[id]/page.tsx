@@ -31,6 +31,9 @@ export default async function DocumentPage({ params }: { params: { id: string } 
   if (!doc) notFound();
 
   const badgeClass = CATEGORIE_BADGE_CLASS[doc.categorie] ?? "badge";
+  const meta = doc.metadata as Record<string, unknown> | null;
+  const isSyncDate = meta?.date_type === "sync";
+  const dateLabel = isSyncDate ? "Indexé le" : "Publié le";
 
   // Trouver des documents similaires (même catégorie, hors celui-ci)
   const related = await prisma.document.findMany({
@@ -84,7 +87,7 @@ export default async function DocumentPage({ params }: { params: { id: string } 
           </span>
           <span>{TYPE_LABELS[doc.type] ?? doc.type}</span>
           <time className="date-label" dateTime={new Date(doc.date_publication).toISOString()}>
-            {formatDate(doc.date_publication, "long")}
+            {dateLabel} {formatDate(doc.date_publication, "long")}
           </time>
         </div>
 
