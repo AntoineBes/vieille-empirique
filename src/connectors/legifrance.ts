@@ -1,9 +1,10 @@
 /**
- * Connecteur Légifrance — API PISTE
+ * Connecteur Légifrance — API PISTE (production)
  * Docs : https://developer.aife.economie.gouv.fr/
  *
- * Auth OAuth2 client_credentials (inscription gratuite PISTE)
- * Scope : openid + APIs Légifrance
+ * Auth OAuth2 client_credentials
+ * Endpoint : /consult/lastNJo pour les derniers JO
+ *            /search avec fond=JORF pour la recherche
  */
 
 import { BaseConnector } from "./base";
@@ -15,19 +16,22 @@ interface PisteTokenResponse {
   expires_in: number;
 }
 
-interface LegifranceItem {
-  id: string;
+interface JorfTextItem {
+  id?: string;
+  cid?: string;
   title?: string;
+  titre?: string;
   nor?: string;
   nature?: string;
   dateSignature?: string;
   dateParution?: string;
-  urlLegifrance?: string;
-  abstract?: string;
+  datePubli?: string;
 }
 
-interface LegifranceSearchResponse {
-  results?: LegifranceItem[];
+interface JorfSearchResult {
+  results?: Array<{
+    titles?: Array<{ id?: string; cid?: string; title?: string; nor?: string; nature?: string; dateSignature?: string; datePubli?: string }>;
+  }>;
   totalResultNumber?: number;
 }
 
@@ -67,8 +71,9 @@ function typeToClassification(type: TypeDocument): { categorie: Categorie; sous_
 export class LegifranceConnector extends BaseConnector {
   readonly institution = Institution.LEGIFRANCE;
 
-  private readonly tokenUrl = "https://sandbox-oauth.piste.gouv.fr/api/oauth/token";
-  private readonly apiUrl = "https://sandbox-api.piste.gouv.fr/dila/legifrance/lf-engine-app";
+  // Production PISTE URLs
+  private readonly tokenUrl = "https://oauth.piste.gouv.fr/api/oauth/token";
+  private readonly apiUrl = "https://api.piste.gouv.fr/dila/legifrance/lf-engine-app";
 
   private cachedToken: string | null = null;
   private tokenExpiresAt = 0;
@@ -78,19 +83,30 @@ export class LegifranceConnector extends BaseConnector {
       return this.cachedToken;
     }
 
+    const clientId = process.env.PISTE_CLIENT_ID;
+    const clientSecret = process.env.PISTE_CLIENT_SECRET;
+
+    if (!clientId || !clientSecret) {
+      throw new Error("PISTE_CLIENT_ID et PISTE_CLIENT_SECRET requis pour Légifrance");
+    }
+
     const resp = await fetch(this.tokenUrl, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({
         grant_type: "client_credentials",
-        client_id: process.env.PISTE_CLIENT_ID ?? "",
-        client_secret: process.env.PISTE_CLIENT_SECRET ?? "",
+        client_id: clientId,
+        client_secret: clientSecret,
         scope: "openid",
       }),
       signal: AbortSignal.timeout(15_000),
     });
 
-    if (!resp.ok) throw new Error(`PISTE token HTTP ${resp.status}`);
+    if (!resp.ok) {
+      const text = await resp.text().catch(() => "");
+      throw new Error(`PISTE token HTTP ${resp.status}: ${text.slice(0, 200)}`);
+    }
+
     const data: PisteTokenResponse = await resp.json();
     this.cachedToken = data.access_token;
     this.tokenExpiresAt = Date.now() + (data.expires_in - 60) * 1000;
@@ -102,12 +118,40 @@ export class LegifranceConnector extends BaseConnector {
     const max = config.maxDocuments ?? 100;
     const token = await this.getToken();
 
+    const sinceStr = since.toISOString().split("T")[0];
+    const todayStr = new Date().toISOString().split("T")[0];
+
+    // Recherche JORF avec filtre date
     const body = {
+      fond: "JORF",
       recherche: {
-        champs: [{ typeChamp: "ALL", operateur: "ET", criteres: [{ typeRecherche: "DATE", valeur: since.toISOString().split("T")[0], operateur: "SUPERIEUR" }] }],
+        champs: [
+          {
+            typeChamp: "ALL",
+            criteres: [
+              {
+                typeRecherche: "UN_DES_MOTS",
+                valeur: "*",
+                operateur: "ET",
+              },
+            ],
+            operateur: "ET",
+          },
+        ],
+        filtres: [
+          {
+            facette: "DATE_SIGNATURE",
+            dates: {
+              start: sinceStr,
+              end: todayStr,
+            },
+          },
+        ],
+        operateur: "ET",
         pageNumber: 1,
         pageSize: Math.min(max, 100),
-        sort: "PUBLICATION_DATE_DESC",
+        sort: "SIGNATURE_DATE_DESC",
+        typePagination: "DEFAUT",
       },
     };
 
@@ -122,25 +166,38 @@ export class LegifranceConnector extends BaseConnector {
       signal: AbortSignal.timeout(30_000),
     });
 
-    if (!resp.ok) throw new Error(`Légifrance search HTTP ${resp.status}`);
-    const data: LegifranceSearchResponse = await resp.json();
+    if (!resp.ok) {
+      const text = await resp.text().catch(() => "");
+      throw new Error(`Légifrance search HTTP ${resp.status}: ${text.slice(0, 200)}`);
+    }
 
-    return (data.results ?? []).map((item) => {
-      const type = natToType(item.nature);
-      const { categorie, sous_categorie } = typeToClassification(type);
-      return {
-        source_id: item.id,
-        institution: Institution.LEGIFRANCE,
-        titre: item.title ?? item.nor ?? item.id,
-        type,
-        categorie,
-        sous_categorie,
-        resume: item.abstract?.slice(0, 500),
-        url: item.urlLegifrance ?? `https://www.legifrance.gouv.fr/jorf/id/${item.id}`,
-        date_publication: new Date(item.dateParution ?? item.dateSignature ?? Date.now()),
-        metadata: { nor: item.nor, nature: item.nature },
-      };
-    });
+    const data: JorfSearchResult = await resp.json();
+    const docs: DocumentMetadata[] = [];
+
+    for (const result of data.results ?? []) {
+      for (const item of result.titles ?? []) {
+        const id = item.cid ?? item.id;
+        if (!id) continue;
+
+        const type = natToType(item.nature);
+        const { categorie, sous_categorie } = typeToClassification(type);
+
+        docs.push({
+          source_id: id,
+          institution: Institution.LEGIFRANCE,
+          titre: item.title ?? item.nor ?? id,
+          type,
+          categorie,
+          sous_categorie,
+          url: `https://www.legifrance.gouv.fr/jorf/id/${id}`,
+          date_publication: new Date(item.dateSignature ?? item.datePubli ?? Date.now()),
+          metadata: { nor: item.nor, nature: item.nature },
+        });
+      }
+    }
+
+    console.log(`[Légifrance] ${docs.length} textes JORF récupérés`);
+    return docs.slice(0, max);
   }
 
   private defaultSince(): Date {

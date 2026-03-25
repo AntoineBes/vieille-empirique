@@ -81,44 +81,34 @@ export abstract class BaseConnector implements Connector {
 
   /**
    * Upsert un document unique avec déduplication par source_id + institution
+   * Utilise Prisma upsert natif pour éviter les race conditions en batch parallèle
    */
   private async upsertDocument(
     doc: DocumentMetadata
   ): Promise<"inserted" | "updated" | "skipped"> {
-    const existing = await prisma.document.findUnique({
+    const result = await prisma.document.upsert({
       where: {
         source_id_institution: {
           source_id: doc.source_id,
           institution: doc.institution,
         },
       },
-      select: { id: true, titre: true, resume: true },
+      create: {
+        ...doc,
+        metadata: doc.metadata as any ?? undefined,
+      },
+      update: {
+        titre: doc.titre,
+        resume: doc.resume,
+        url: doc.url,
+        metadata: doc.metadata as any ?? undefined,
+        mis_a_jour_le: new Date(),
+      },
+      select: { cree_le: true, mis_a_jour_le: true },
     });
 
-    if (!existing) {
-      await prisma.document.create({
-        data: {
-          ...doc,
-          metadata: doc.metadata as any ?? undefined,
-        },
-      });
-      return "inserted";
-    }
-
-    // Met à jour seulement si le contenu a changé (évite writes inutiles)
-    if (existing.titre !== doc.titre || existing.resume !== doc.resume) {
-      await prisma.document.update({
-        where: { id: existing.id },
-        data: {
-          titre: doc.titre,
-          resume: doc.resume,
-          url: doc.url,
-          mis_a_jour_le: new Date(),
-        },
-      });
-      return "updated";
-    }
-
-    return "skipped";
+    // Si cree_le et mis_a_jour_le sont très proches (< 1s), c'est un insert
+    const diff = result.mis_a_jour_le.getTime() - result.cree_le.getTime();
+    return diff < 1000 ? "inserted" : "updated";
   }
 }
