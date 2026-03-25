@@ -15,6 +15,7 @@ import {
 } from "@/lib/labels";
 
 export const revalidate = 86400; // 24h
+export const maxDuration = 30;
 
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
   const doc = await prisma.document.findUnique({ where: { id: params.id } });

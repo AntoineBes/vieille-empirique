@@ -9,7 +9,8 @@ export const prisma =
     datasourceUrl: process.env.DATABASE_URL,
   });
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+// Singleton en dev ET en production (évite les reconnexions sur Vercel serverless)
+globalForPrisma.prisma = prisma;
 
 /**
  * Utilitaire de déconnexion propre pour les scripts CLI

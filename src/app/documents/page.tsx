@@ -12,6 +12,7 @@ import type { Categorie, Institution, TypeDocument, SousCategorie } from "@prism
 import type { Prisma } from "@prisma/client";
 
 export const revalidate = 1800;
+export const maxDuration = 30;
 
 interface SearchParams {
   q?: string;

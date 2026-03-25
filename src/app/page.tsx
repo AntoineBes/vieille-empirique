@@ -9,32 +9,38 @@ import { StatsBadge } from "@/components/StatsBadge";
 import { INSTITUTION_LABELS, formatNumber } from "@/lib/labels";
 
 export const revalidate = 3600;
+export const maxDuration = 30;
 
 async function getHomeData() {
-  const [recent, countsByCategorie, countsByInstitution, totalDocuments, lastSync] = await Promise.all([
-    prisma.document.findMany({
-      orderBy: { date_publication: "desc" },
-      take: 15,
-    }),
-    prisma.document.groupBy({
-      by: ["categorie"],
-      _count: { id: true },
-      orderBy: { _count: { id: "desc" } },
-    }),
-    prisma.document.groupBy({
-      by: ["institution"],
-      _count: { id: true },
-      orderBy: { _count: { id: "desc" } },
-    }),
-    prisma.document.count(),
-    prisma.syncLog.findFirst({
-      where: { statut: "OK" },
-      orderBy: { termine_le: "desc" },
-      select: { termine_le: true, institution: true },
-    }),
-  ]);
+  try {
+    const [recent, countsByCategorie, countsByInstitution, totalDocuments, lastSync] = await Promise.all([
+      prisma.document.findMany({
+        orderBy: { date_publication: "desc" },
+        take: 15,
+      }),
+      prisma.document.groupBy({
+        by: ["categorie"],
+        _count: { id: true },
+        orderBy: { _count: { id: "desc" } },
+      }),
+      prisma.document.groupBy({
+        by: ["institution"],
+        _count: { id: true },
+        orderBy: { _count: { id: "desc" } },
+      }),
+      prisma.document.count(),
+      prisma.syncLog.findFirst({
+        where: { statut: "OK" },
+        orderBy: { termine_le: "desc" },
+        select: { termine_le: true, institution: true },
+      }),
+    ]);
 
-  return { recent, countsByCategorie, countsByInstitution, totalDocuments, lastSync };
+    return { recent, countsByCategorie, countsByInstitution, totalDocuments, lastSync };
+  } catch (err) {
+    console.error("[HomePage] Erreur DB:", err);
+    return { recent: [], countsByCategorie: [], countsByInstitution: [], totalDocuments: 0, lastSync: null };
+  }
 }
 
 export default async function HomePage() {

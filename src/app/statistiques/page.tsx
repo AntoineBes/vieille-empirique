@@ -21,29 +21,35 @@ export const metadata: Metadata = {
 };
 
 export const revalidate = 3600;
+export const maxDuration = 30;
 
 async function getStats() {
-  const [
-    totalDocuments,
-    byCategorie,
-    byInstitution,
-    byType,
-    bySousCategorie,
-    recentSyncs,
-    oldestDoc,
-    newestDoc,
-  ] = await Promise.all([
-    prisma.document.count(),
-    prisma.document.groupBy({ by: ["categorie"], _count: { id: true }, orderBy: { _count: { id: "desc" } } }),
-    prisma.document.groupBy({ by: ["institution"], _count: { id: true }, orderBy: { _count: { id: "desc" } } }),
-    prisma.document.groupBy({ by: ["type"], _count: { id: true }, orderBy: { _count: { id: "desc" } } }),
-    prisma.document.groupBy({ by: ["sous_categorie"], _count: { id: true }, orderBy: { _count: { id: "desc" } }, where: { sous_categorie: { not: null } } }),
-    prisma.syncLog.findMany({ orderBy: { demarre_le: "desc" }, take: 20 }),
-    prisma.document.findFirst({ orderBy: { date_publication: "asc" }, select: { date_publication: true } }),
-    prisma.document.findFirst({ orderBy: { date_publication: "desc" }, select: { date_publication: true } }),
-  ]);
+  try {
+    const [
+      totalDocuments,
+      byCategorie,
+      byInstitution,
+      byType,
+      bySousCategorie,
+      recentSyncs,
+      oldestDoc,
+      newestDoc,
+    ] = await Promise.all([
+      prisma.document.count(),
+      prisma.document.groupBy({ by: ["categorie"], _count: { id: true }, orderBy: { _count: { id: "desc" } } }),
+      prisma.document.groupBy({ by: ["institution"], _count: { id: true }, orderBy: { _count: { id: "desc" } } }),
+      prisma.document.groupBy({ by: ["type"], _count: { id: true }, orderBy: { _count: { id: "desc" } } }),
+      prisma.document.groupBy({ by: ["sous_categorie"], _count: { id: true }, orderBy: { _count: { id: "desc" } }, where: { sous_categorie: { not: null } } }),
+      prisma.syncLog.findMany({ orderBy: { demarre_le: "desc" }, take: 20 }),
+      prisma.document.findFirst({ orderBy: { date_publication: "asc" }, select: { date_publication: true } }),
+      prisma.document.findFirst({ orderBy: { date_publication: "desc" }, select: { date_publication: true } }),
+    ]);
 
-  return { totalDocuments, byCategorie, byInstitution, byType, bySousCategorie, recentSyncs, oldestDoc, newestDoc };
+    return { totalDocuments, byCategorie, byInstitution, byType, bySousCategorie, recentSyncs, oldestDoc, newestDoc };
+  } catch (err) {
+    console.error("[Statistiques] Erreur DB:", err);
+    return { totalDocuments: 0, byCategorie: [], byInstitution: [], byType: [], bySousCategorie: [], recentSyncs: [], oldestDoc: null, newestDoc: null };
+  }
 }
 
 export default async function StatistiquesPage() {
