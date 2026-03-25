@@ -39,23 +39,26 @@ describe("LegifranceConnector", () => {
       json: async () => ({ access_token: "test-token", expires_in: 3600 }),
     });
 
-    // Mock search
+    // Mock search — nouveau format avec results[].titles[]
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => ({
         results: [
           {
-            id: "LOI-2024-001",
-            title: "LOI n° 2024-001 relative aux finances",
-            nature: "LOI",
-            dateParution: new Date().toISOString(),
-            urlLegifrance: "https://www.legifrance.gouv.fr/jorf/id/LOI-2024-001",
-          },
-          {
-            id: "DEC-2024-001",
-            title: "Décret n° 2024-001",
-            nature: "DECRET",
-            dateParution: new Date().toISOString(),
+            titles: [
+              {
+                cid: "LOI-2024-001",
+                title: "LOI n° 2024-001 relative aux finances",
+                nature: "LOI",
+                dateSignature: new Date().toISOString(),
+              },
+              {
+                cid: "DEC-2024-001",
+                title: "Décret n° 2024-001",
+                nature: "DECRET",
+                dateSignature: new Date().toISOString(),
+              },
+            ],
           },
         ],
       }),
@@ -75,6 +78,7 @@ describe("LegifranceConnector", () => {
     mockFetch.mockResolvedValueOnce({
       ok: false,
       status: 401,
+      text: async () => "Unauthorized",
     });
 
     await expect(connector.fetch()).rejects.toThrow("PISTE token HTTP 401");
