@@ -8,11 +8,19 @@ import { TypeFilter } from "./TypeFilter";
 import { SousCategorieFilter } from "./SousCategorieFilter";
 import { DateFilter } from "./DateFilter";
 
-interface FilterBarProps {
-  searchParams: Record<string, string | undefined>;
+interface AvailableFilters {
+  categories: string[];
+  institutions: string[];
+  types: string[];
+  sousCategories: string[];
 }
 
-export function FilterBar({ searchParams }: FilterBarProps) {
+interface FilterBarProps {
+  searchParams: Record<string, string | undefined>;
+  availableFilters?: AvailableFilters;
+}
+
+export function FilterBar({ searchParams, availableFilters }: FilterBarProps) {
   const router = useRouter();
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -42,13 +50,14 @@ export function FilterBar({ searchParams }: FilterBarProps) {
 
       {/* Filtres en grille responsive */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4">
-        <CategoryFilter selected={searchParams.categorie} />
+        <CategoryFilter selected={searchParams.categorie} available={availableFilters?.categories} />
         <SousCategorieFilter
           selected={searchParams.sous_categorie}
           categorieParente={searchParams.categorie}
+          available={availableFilters?.sousCategories}
         />
-        <InstitutionFilter selected={searchParams.institution} />
-        <TypeFilter selected={searchParams.type} />
+        <InstitutionFilter selected={searchParams.institution} available={availableFilters?.institutions} />
+        <TypeFilter selected={searchParams.type} available={availableFilters?.types} />
         <DateFilter defaultValue={searchParams.depuis} />
       </div>
 

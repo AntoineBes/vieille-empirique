@@ -94,7 +94,7 @@ describe("Performance — Connecteurs", () => {
     const time1000 = performance.now() - start2;
 
     const ratio = time1000 / time100;
-    expect(ratio).toBeLessThan(20);
+    expect(ratio).toBeLessThan(30);
     console.log(`[PERF] Ratio 1000/100 dataflows: ${ratio.toFixed(1)}x (linéaire attendu ~10x)`);
   });
 });

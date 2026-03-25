@@ -5,13 +5,23 @@ import { SOUS_CATEGORIE_LABELS, SOUS_CATEGORIES_PAR_CATEGORIE } from "@/lib/labe
 interface Props {
   selected?: string;
   categorieParente?: string;
+  available?: string[];
 }
 
-export function SousCategorieFilter({ selected, categorieParente }: Props) {
+export function SousCategorieFilter({ selected, categorieParente, available }: Props) {
   // Si une catégorie parente est sélectionnée, ne montrer que ses sous-catégories
-  const entries = categorieParente && SOUS_CATEGORIES_PAR_CATEGORIE[categorieParente]
-    ? SOUS_CATEGORIES_PAR_CATEGORIE[categorieParente].map((key) => [key, SOUS_CATEGORIE_LABELS[key] ?? key] as const)
-    : Object.entries(SOUS_CATEGORIE_LABELS);
+  let entries: Array<readonly [string, string]>;
+
+  if (categorieParente && SOUS_CATEGORIES_PAR_CATEGORIE[categorieParente]) {
+    entries = SOUS_CATEGORIES_PAR_CATEGORIE[categorieParente].map((key) => [key, SOUS_CATEGORIE_LABELS[key] ?? key] as const);
+  } else {
+    entries = Object.entries(SOUS_CATEGORIE_LABELS);
+  }
+
+  // Ne garder que les sous-catégories qui ont des documents en base
+  if (available) {
+    entries = entries.filter(([key]) => available.includes(key));
+  }
 
   return (
     <div className="flex flex-col gap-1.5">

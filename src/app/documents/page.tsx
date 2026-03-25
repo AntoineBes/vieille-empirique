@@ -26,6 +26,22 @@ interface SearchParams {
 
 const PAGE_SIZE = 25;
 
+/** Récupère les valeurs distinctes présentes en base pour chaque champ filtrable */
+async function getAvailableFilters() {
+  const [categories, institutions, types, sousCategories] = await Promise.all([
+    prisma.document.findMany({ select: { categorie: true }, distinct: ["categorie"] }),
+    prisma.document.findMany({ select: { institution: true }, distinct: ["institution"] }),
+    prisma.document.findMany({ select: { type: true }, distinct: ["type"] }),
+    prisma.document.findMany({ select: { sous_categorie: true }, distinct: ["sous_categorie"], where: { sous_categorie: { not: null } } }),
+  ]);
+  return {
+    categories: categories.map((c) => c.categorie),
+    institutions: institutions.map((i) => i.institution),
+    types: types.map((t) => t.type),
+    sousCategories: sousCategories.map((s) => s.sous_categorie!),
+  };
+}
+
 async function searchDocuments(params: SearchParams) {
   const page = Math.max(1, parseInt(params.page ?? "1", 10));
   const skip = (page - 1) * PAGE_SIZE;
@@ -72,7 +88,10 @@ export default async function DocumentsPage({
 }: {
   searchParams: SearchParams;
 }) {
-  const { documents, total, page, totalPages } = await searchDocuments(searchParams);
+  const [{ documents, total, page, totalPages }, availableFilters] = await Promise.all([
+    searchDocuments(searchParams),
+    getAvailableFilters(),
+  ]);
 
   const hasFilters = Object.values(searchParams).some((v) => v && v.trim());
 
@@ -84,7 +103,7 @@ export default async function DocumentsPage({
       </p>
 
       {/* Barre de filtres complète */}
-      <FilterBar searchParams={searchParams as Record<string, string | undefined>} />
+      <FilterBar searchParams={searchParams as Record<string, string | undefined>} availableFilters={availableFilters} />
 
       {/* Résultats */}
       <div className="flex items-center justify-between mb-4">
