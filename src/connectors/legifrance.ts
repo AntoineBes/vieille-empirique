@@ -71,10 +71,9 @@ function typeToClassification(type: TypeDocument): { categorie: Categorie; sous_
 export class LegifranceConnector extends BaseConnector {
   readonly institution = Institution.LEGIFRANCE;
 
-  // PISTE URLs — sandbox (credentials sandbox)
-  // Pour passer en production : oauth.piste.gouv.fr et api.piste.gouv.fr
-  private readonly tokenUrl = "https://sandbox-oauth.piste.gouv.fr/api/oauth/token";
-  private readonly apiUrl = "https://sandbox-api.piste.gouv.fr/dila/legifrance/lf-engine-app";
+  // PISTE URLs — production
+  private readonly tokenUrl = "https://oauth.piste.gouv.fr/api/oauth/token";
+  private readonly apiUrl = "https://api.piste.gouv.fr/dila/legifrance/lf-engine-app";
 
   private cachedToken: string | null = null;
   private tokenExpiresAt = 0;
@@ -203,7 +202,7 @@ export class LegifranceConnector extends BaseConnector {
 
   private defaultSince(): Date {
     const d = new Date();
-    d.setDate(d.getDate() - 30);
+    d.setFullYear(d.getFullYear() - 1); // 1 an en arrière
     return d;
   }
 }

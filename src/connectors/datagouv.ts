@@ -41,18 +41,16 @@ export class DatagouvConnector extends BaseConnector {
   private readonly baseUrl = "https://www.data.gouv.fr/api/1";
 
   protected async fetchDocuments(config: ConnectorConfig): Promise<DocumentMetadata[]> {
-    const since = config.since ?? this.defaultSince();
-    const max = config.maxDocuments ?? 200;
+    const max = config.maxDocuments ?? 500;
     const allDocs: DocumentMetadata[] = [];
 
     // On interroge chaque organisation séparément (tolérance aux pannes partielle)
     for (const org of ORGS) {
       try {
-        const orgDocs = await this.fetchOrg(org, since, Math.floor(max / ORGS.length));
+        const orgDocs = await this.fetchOrg(org);
         allDocs.push(...orgDocs);
       } catch (err) {
         console.error(`[DataGouv] Erreur org ${org.slug}:`, err);
-        // On continue avec les autres organisations
       }
     }
 
@@ -61,41 +59,47 @@ export class DatagouvConnector extends BaseConnector {
 
   private async fetchOrg(
     org: (typeof ORGS)[number],
-    since: Date,
-    max: number
   ): Promise<DocumentMetadata[]> {
-    const url = new URL(`${this.baseUrl}/datasets/`);
-    url.searchParams.set("organization", org.id);
-    url.searchParams.set("sort", "-created");
-    url.searchParams.set("page_size", String(Math.min(max, 100)));
+    const docs: DocumentMetadata[] = [];
+    let page = 1;
 
-    const resp = await fetch(url.toString(), {
-      headers: { Accept: "application/json", "X-Fields": "data{id,title,description,created_at,page,tags}" },
-      signal: AbortSignal.timeout(20_000),
-    });
+    // Pagination pour récupérer tous les datasets de l'organisation
+    while (true) {
+      const url = new URL(`${this.baseUrl}/datasets/`);
+      url.searchParams.set("organization", org.id);
+      url.searchParams.set("sort", "-created");
+      url.searchParams.set("page_size", "100");
+      url.searchParams.set("page", String(page));
 
-    if (!resp.ok) throw new Error(`DataGouv org ${org.slug} HTTP ${resp.status}`);
-    const data: DatagouvResponse = await resp.json();
+      const resp = await fetch(url.toString(), {
+        headers: { Accept: "application/json", "X-Fields": "data{id,title,description,created_at,page,tags},next_page" },
+        signal: AbortSignal.timeout(20_000),
+      });
 
-    return (data.data ?? [])
-      .filter((ds) => ds.created_at && new Date(ds.created_at) >= since)
-      .map((ds) => ({
-        source_id: ds.id,
-        institution: org.institution,
-        titre: ds.title,
-        type: TypeDocument.JEU_DE_DONNEES,
-        categorie: org.categorie,
-        sous_categorie: org.sous_categorie,
-        resume: ds.description?.replace(/<[^>]+>/g, "").slice(0, 500),
-        url: ds.page ?? `https://www.data.gouv.fr/fr/datasets/${ds.id}/`,
-        date_publication: new Date(ds.created_at!),
-        metadata: { tags: ds.tags, organisation: ds.organization?.name },
-      }));
-  }
+      if (!resp.ok) throw new Error(`DataGouv org ${org.slug} HTTP ${resp.status}`);
+      const data: DatagouvResponse = await resp.json();
+      const items = data.data ?? [];
 
-  private defaultSince(): Date {
-    const d = new Date();
-    d.setDate(d.getDate() - 30);
-    return d;
+      for (const ds of items) {
+        if (!ds.created_at) continue;
+        docs.push({
+          source_id: ds.id,
+          institution: org.institution,
+          titre: ds.title,
+          type: TypeDocument.JEU_DE_DONNEES,
+          categorie: org.categorie,
+          sous_categorie: org.sous_categorie,
+          resume: ds.description?.replace(/<[^>]+>/g, "").slice(0, 500),
+          url: ds.page ?? `https://www.data.gouv.fr/fr/datasets/${ds.id}/`,
+          date_publication: new Date(ds.created_at),
+          metadata: { tags: ds.tags, organisation: ds.organization?.name },
+        });
+      }
+
+      if (!data.next_page || items.length < 100) break;
+      page++;
+    }
+
+    return docs;
   }
 }
