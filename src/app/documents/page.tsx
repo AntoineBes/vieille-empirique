@@ -8,8 +8,16 @@ import { DocumentCard } from "@/components/DocumentCard";
 import { FilterBar } from "@/components/filters/FilterBar";
 import { Pagination } from "@/components/Pagination";
 import { formatNumber } from "@/lib/labels";
+import { searchParamsSchema } from "@/lib/sanitize";
 import type { Categorie, Institution, TypeDocument, SousCategorie } from "@prisma/client";
 import type { Prisma } from "@prisma/client";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Documents",
+  description:
+    "Recherchez et filtrez les publications officielles françaises et européennes par catégorie, institution, type ou date.",
+};
 
 export const revalidate = 1800;
 export const maxDuration = 30;
@@ -43,28 +51,34 @@ async function getAvailableFilters() {
 }
 
 async function searchDocuments(params: SearchParams) {
-  const page = Math.max(1, parseInt(params.page ?? "1", 10));
+  const parsed = searchParamsSchema.safeParse(params);
+  if (!parsed.success) {
+    return { documents: [], total: 0, page: 1, totalPages: 0 };
+  }
+  const safe = parsed.data;
+
+  const page = safe.page ?? 1;
   const skip = (page - 1) * PAGE_SIZE;
 
   const where: Prisma.DocumentWhereInput = {};
 
-  if (params.q) {
-    where.titre = { contains: params.q, mode: "insensitive" };
+  if (safe.q) {
+    where.titre = { contains: safe.q, mode: "insensitive" };
   }
-  if (params.categorie) {
-    where.categorie = params.categorie as Categorie;
+  if (safe.categorie) {
+    where.categorie = safe.categorie as Categorie;
   }
-  if (params.institution) {
-    where.institution = params.institution as Institution;
+  if (safe.institution) {
+    where.institution = safe.institution as Institution;
   }
-  if (params.type) {
-    where.type = params.type as TypeDocument;
+  if (safe.type) {
+    where.type = safe.type as TypeDocument;
   }
-  if (params.sous_categorie) {
-    where.sous_categorie = params.sous_categorie as SousCategorie;
+  if (safe.sous_categorie) {
+    where.sous_categorie = safe.sous_categorie as SousCategorie;
   }
-  if (params.depuis) {
-    const date = new Date(params.depuis);
+  if (safe.depuis) {
+    const date = new Date(safe.depuis);
     if (!isNaN(date.getTime())) {
       where.date_publication = { gte: date };
     }

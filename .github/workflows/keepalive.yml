@@ -1,0 +1,27 @@
+name: Keepalive — Prevent workflow auto-disable
+
+on:
+  schedule:
+    # Tous les 50 jours (GitHub désactive les crons après 60j d'inactivité)
+    - cron: "0 12 1 */2 *"
+
+jobs:
+  keepalive:
+    name: Keepalive
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Re-enable scheduled workflows
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api repos/${{ github.repository }}/actions/workflows --jq '.workflows[] | select(.state == "disabled_inactivity") | .id' | while read id; do
+            echo "Re-enabling workflow $id"
+            gh api -X PUT "repos/${{ github.repository }}/actions/workflows/$id/enable"
+          done
+          echo "All workflows checked."

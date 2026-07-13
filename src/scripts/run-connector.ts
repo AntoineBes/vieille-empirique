@@ -12,6 +12,9 @@ import {
   BanqueDeFranceConnector,
   DatagouvConnector,
   OcdeConnector,
+  EurostatConnector,
+  SenatConnector,
+  JudilibreConnector,
 } from "@/connectors";
 import type { BaseConnector } from "@/connectors/base";
 
@@ -21,6 +24,9 @@ const CONNECTORS: Record<string, () => BaseConnector> = {
   "banque-de-france": () => new BanqueDeFranceConnector(),
   datagouv: () => new DatagouvConnector(),
   ocde: () => new OcdeConnector(),
+  eurostat: () => new EurostatConnector(),
+  senat: () => new SenatConnector(),
+  judilibre: () => new JudilibreConnector(),
 };
 
 async function main() {

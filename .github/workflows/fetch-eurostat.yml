@@ -1,0 +1,26 @@
+name: Fetch — Eurostat
+
+on:
+  schedule:
+    - cron: "30 5 * * 1"  # Lundi à 05h30 UTC (hebdomadaire)
+  workflow_dispatch:
+
+jobs:
+  fetch:
+    name: Sync Eurostat
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+      - run: npm ci
+      - run: npx prisma generate
+      - name: Run Eurostat connector
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
+        run: npx tsx src/scripts/run-connector.ts eurostat

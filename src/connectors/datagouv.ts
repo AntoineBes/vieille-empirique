@@ -33,6 +33,10 @@ const ORGS: Array<{ id: string; slug: string; institution: Institution; categori
   { id: "617a98a519a26b90337055dd", slug: "dares-statistiques-travail", institution: Institution.DARES, categorie: Categorie.ECONOMIE, sous_categorie: SousCategorie.MARCHE_DU_TRAVAIL },
   { id: "534fff96a3a7292c64a77fe7", slug: "ministere-de-l-economie-de-l-industrie-et-du-numerique", institution: Institution.MINISTERE_ECONOMIE, categorie: Categorie.ECONOMIE, sous_categorie: SousCategorie.FINANCES_PUBLIQUES },
   { id: "534fff96a3a7292c64a77ff4", slug: "ministere-du-travail-du-plein-emploi-et-de-l-insertion", institution: Institution.MINISTERE_TRAVAIL, categorie: Categorie.ECONOMIE, sous_categorie: SousCategorie.MARCHE_DU_TRAVAIL },
+  { id: "534fff8ea3a7292c64a77f02", slug: "ministeres-economiques-et-financiers", institution: Institution.DGFIP, categorie: Categorie.ECONOMIE, sous_categorie: SousCategorie.FINANCES_PUBLIQUES },
+  { id: "534fff94a3a7292c64a77fc1", slug: "ministere-des-solidarites-et-de-la-sante", institution: Institution.DREES, categorie: Categorie.SOCIETE, sous_categorie: SousCategorie.SANTE },
+  { id: "55819607c751df7bdda453b9", slug: "assemblee-nationale", institution: Institution.ASSEMBLEE_NATIONALE, categorie: Categorie.POLITIQUE, sous_categorie: SousCategorie.INSTITUTIONS },
+  { id: "53a8b6eba3a72905b7ce595b", slug: "senat", institution: Institution.SENAT, categorie: Categorie.POLITIQUE, sous_categorie: SousCategorie.INSTITUTIONS },
 ];
 
 export class DatagouvConnector extends BaseConnector {

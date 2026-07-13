@@ -7,7 +7,7 @@ export function Footer() {
           <div>
             <p className="font-serif font-semibold mb-2">Veille Empirique</p>
             <p className="text-sm text-ink-500 leading-relaxed">
-              Agrégateur de métadonnées de publications officielles françaises.
+              Agrégateur de métadonnées de publications officielles françaises et européennes.
               Sources ouvertes, données publiques.
             </p>
           </div>
@@ -32,6 +32,10 @@ export function Footer() {
               <li><a href="https://www.banque-france.fr" target="_blank" rel="noopener noreferrer" className="link-subtle">Banque de France</a></li>
               <li><a href="https://www.data.gouv.fr" target="_blank" rel="noopener noreferrer" className="link-subtle">data.gouv.fr</a></li>
               <li><a href="https://www.oecd.org" target="_blank" rel="noopener noreferrer" className="link-subtle">OCDE</a></li>
+              <li><a href="https://ec.europa.eu/eurostat" target="_blank" rel="noopener noreferrer" className="link-subtle">Eurostat</a></li>
+              <li><a href="https://www.senat.fr" target="_blank" rel="noopener noreferrer" className="link-subtle">Sénat</a></li>
+              <li><a href="https://www.courdecassation.fr" target="_blank" rel="noopener noreferrer" className="link-subtle">Cour de cassation</a></li>
+              <li><a href="https://www.conseil-constitutionnel.fr" target="_blank" rel="noopener noreferrer" className="link-subtle">Conseil constitutionnel</a></li>
             </ul>
 
             <p className="font-mono text-xs uppercase tracking-wider text-ink-400 mb-3 mt-6">Projet associé</p>

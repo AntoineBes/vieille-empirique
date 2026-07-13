@@ -197,12 +197,99 @@ export class LegifranceConnector extends BaseConnector {
     }
 
     console.log(`[Légifrance] ${docs.length} textes JORF récupérés`);
+
+    // Recherche CONSTIT (Conseil constitutionnel) — QPC et DC
+    const constitDocs = await this.fetchConstit(token, sinceStr, todayStr, max - docs.length);
+    docs.push(...constitDocs);
+
     return docs.slice(0, max);
+  }
+
+  private async fetchConstit(token: string, sinceStr: string, todayStr: string, limit: number): Promise<DocumentMetadata[]> {
+    if (limit <= 0) return [];
+
+    const body = {
+      fond: "CONSTIT",
+      recherche: {
+        champs: [
+          {
+            typeChamp: "ALL",
+            criteres: [{ typeRecherche: "UN_DES_MOTS", valeur: "*", operateur: "ET" }],
+            operateur: "ET",
+          },
+        ],
+        filtres: [
+          { facette: "DATE_DECISION", dates: { start: sinceStr, end: todayStr } },
+        ],
+        operateur: "ET",
+        pageNumber: 1,
+        pageSize: Math.min(limit, 50),
+        sort: "DECISION_DATE_DESC",
+        typePagination: "DEFAUT",
+      },
+    };
+
+    try {
+      const resp = await fetch(`${this.apiUrl}/search`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(body),
+        signal: AbortSignal.timeout(30_000),
+      });
+
+      if (!resp.ok) {
+        console.warn(`[Légifrance] CONSTIT search HTTP ${resp.status}`);
+        return [];
+      }
+
+      const data: JorfSearchResult = await resp.json();
+      const docs: DocumentMetadata[] = [];
+
+      for (const result of data.results ?? []) {
+        for (const item of result.titles ?? []) {
+          const id = item.cid ?? item.id;
+          if (!id) continue;
+
+          const type = this.classifyConstitDecision(item.title ?? "");
+          const sous_categorie = type === TypeDocument.QPC
+            ? SousCategorie.DROIT_CONSTITUTIONNEL
+            : SousCategorie.DROIT_CONSTITUTIONNEL;
+
+          docs.push({
+            source_id: id,
+            institution: Institution.CONSEIL_CONSTITUTIONNEL,
+            titre: item.title ?? item.nor ?? id,
+            type,
+            categorie: Categorie.DROIT,
+            sous_categorie,
+            url: `https://www.conseil-constitutionnel.fr/decision/${id}`,
+            date_publication: new Date(item.dateSignature ?? item.datePubli ?? Date.now()),
+            metadata: { nor: item.nor, nature: item.nature, fond: "CONSTIT" },
+          });
+        }
+      }
+
+      console.log(`[Légifrance] ${docs.length} décisions CONSTIT récupérées`);
+      return docs;
+    } catch (err) {
+      console.warn("[Légifrance] Erreur CONSTIT:", err instanceof Error ? err.message : err);
+      return [];
+    }
+  }
+
+  private classifyConstitDecision(title: string): TypeDocument {
+    const t = title.toUpperCase();
+    if (t.includes("QPC")) return TypeDocument.QPC;
+    return TypeDocument.DECISION_CC;
   }
 
   private defaultSince(): Date {
     const d = new Date();
-    d.setFullYear(d.getFullYear() - 1); // 1 an en arrière
+    d.setFullYear(d.getFullYear() - 1);
     return d;
   }
 }

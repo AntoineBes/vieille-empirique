@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Mentions légales",
+  description: "Informations légales, éditeur, hébergement et sources de données de Veille Empirique.",
+  robots: { index: false, follow: true },
 };
 
 export default function MentionsLegales() {
@@ -28,11 +30,14 @@ export default function MentionsLegales() {
           <h2 className="font-serif text-lg font-semibold text-ink-900 mb-2">Sources des données</h2>
           <p>Les métadonnées sont collectées via les APIs publiques officielles :</p>
           <ul className="list-disc pl-5 space-y-1 mt-2">
-            <li>Légifrance (API PISTE — DILA)</li>
-            <li>INSEE (API Melodi)</li>
-            <li>Banque de France (Webstat)</li>
-            <li>data.gouv.fr (API v1)</li>
-            <li>OCDE (API publique)</li>
+            <li>Légifrance — JORF et Conseil constitutionnel (API PISTE — DILA)</li>
+            <li>INSEE — BDM (API SDMX)</li>
+            <li>Banque de France (API Webstat)</li>
+            <li>data.gouv.fr — 8 organisations (API REST, Licence Ouverte Etalab)</li>
+            <li>OCDE (API SDMX)</li>
+            <li>Eurostat (API JSON-stat)</li>
+            <li>Sénat (flux RSS officiel)</li>
+            <li>Judilibre — Cour de cassation (API officielle)</li>
           </ul>
         </section>
 

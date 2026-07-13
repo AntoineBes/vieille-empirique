@@ -46,6 +46,13 @@ export const INSTITUTION_LABELS: Record<string, string> = {
   COUR_DE_CASSATION: "Cour de cassation",
   MINISTERE_ECONOMIE: "Min. Économie",
   MINISTERE_TRAVAIL: "Min. Travail",
+  EUROSTAT: "Eurostat",
+  AFT: "Agence France Trésor",
+  HCFP: "HCFP",
+  ASSEMBLEE_NATIONALE: "Assemblée nationale",
+  SENAT: "Sénat",
+  DREES: "DREES",
+  DGFIP: "DGFiP",
   AUTRE: "Autre",
 };
 
@@ -71,6 +78,9 @@ export const TYPE_LABELS: Record<string, string> = {
   PROJECTION: "Projection",
   ETUDE: "Étude",
   COMPARAISON_INTERNATIONALE: "Comparaison internationale",
+  DOSSIER_LEGISLATIF: "Dossier législatif",
+  SCRUTIN: "Scrutin",
+  AVIS: "Avis",
   AUTRE: "Autre",
 };
 

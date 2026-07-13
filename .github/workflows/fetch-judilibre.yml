@@ -1,0 +1,27 @@
+name: Fetch — Judilibre (Cour de cassation)
+
+on:
+  schedule:
+    - cron: "30 7 * * 1"  # Lundi à 07h30 UTC (hebdomadaire)
+  workflow_dispatch:
+
+jobs:
+  fetch:
+    name: Sync Judilibre
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+      - run: npm ci
+      - run: npx prisma generate
+      - name: Run Judilibre connector
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
+          JUDILIBRE_API_KEY: ${{ secrets.JUDILIBRE_API_KEY }}
+        run: npx tsx src/scripts/run-connector.ts judilibre

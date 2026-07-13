@@ -58,9 +58,9 @@ export default async function HomePage() {
             pour y voir plus clair
           </p>
           <p className="text-sm sm:text-base text-ink-600 mt-4 sm:mt-6 max-w-xl leading-relaxed">
-            Agrégateur de métadonnées de publications officielles françaises.
-            Lois, décrets, statistiques, rapports — indexés quotidiennement
-            depuis les APIs publiques.
+            Agrégateur de métadonnées de publications officielles françaises et européennes.
+            Lois, décrets, statistiques, rapports, jurisprudence — indexés quotidiennement
+            depuis les APIs publiques et flux officiels.
           </p>
 
           {/* Compteur global */}

@@ -17,12 +17,22 @@ import {
 export const revalidate = 86400; // 24h
 export const maxDuration = 30;
 
+const BASE_URL = process.env.NEXT_PUBLIC_URL ?? "https://veille.empirisme-citoyen.fr";
+
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
   const doc = await prisma.document.findUnique({ where: { id: params.id } });
   if (!doc) return { title: "Document non trouvé" };
   return {
     title: doc.titre,
     description: doc.resume ?? `${INSTITUTION_LABELS[doc.institution]} — ${TYPE_LABELS[doc.type]}`,
+    alternates: { canonical: `${BASE_URL}/documents/${doc.id}` },
+    openGraph: {
+      title: doc.titre,
+      description: doc.resume ?? `${INSTITUTION_LABELS[doc.institution]} — ${TYPE_LABELS[doc.type]}`,
+      type: "article",
+      publishedTime: new Date(doc.date_publication).toISOString(),
+      modifiedTime: new Date(doc.mis_a_jour_le).toISOString(),
+    },
   };
 }
 
@@ -46,8 +56,23 @@ export default async function DocumentPage({ params }: { params: { id: string } 
     select: { id: true, titre: true, institution: true, date_publication: true },
   });
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: doc.titre,
+    datePublished: new Date(doc.date_publication).toISOString(),
+    dateModified: new Date(doc.mis_a_jour_le).toISOString(),
+    publisher: { "@type": "Organization", name: INSTITUTION_LABELS[doc.institution] },
+    description: doc.resume ?? undefined,
+    mainEntityOfPage: `${BASE_URL}/documents/${doc.id}`,
+  };
+
   return (
     <div className="container-wide py-10">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="max-w-3xl mx-auto">
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-sm mb-8" aria-label="Fil d'Ariane">

@@ -91,6 +91,11 @@ enum TypeDocument {
   // OCDE
   COMPARAISON_INTERNATIONALE
 
+  // Institutions parlementaires
+  DOSSIER_LEGISLATIF
+  SCRUTIN
+  AVIS
+
   // Générique
   AUTRE
 }
@@ -108,6 +113,13 @@ enum Institution {
   COUR_DE_CASSATION
   MINISTERE_ECONOMIE
   MINISTERE_TRAVAIL
+  EUROSTAT
+  AFT
+  HCFP
+  ASSEMBLEE_NATIONALE
+  SENAT
+  DREES
+  DGFIP
   AUTRE
 }
 

@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Politique de confidentialité",
+  description: "Politique de confidentialité de Veille Empirique : aucune donnée personnelle collectée, aucun cookie.",
+  robots: { index: false, follow: true },
 };
 
 export default function PolitiqueConfidentialite() {

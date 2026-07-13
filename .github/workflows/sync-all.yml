@@ -29,4 +29,5 @@ jobs:
           DIRECT_URL: ${{ secrets.DIRECT_URL }}
           PISTE_CLIENT_ID: ${{ secrets.PISTE_CLIENT_ID }}
           PISTE_CLIENT_SECRET: ${{ secrets.PISTE_CLIENT_SECRET }}
+          JUDILIBRE_API_KEY: ${{ secrets.JUDILIBRE_API_KEY }}
         run: npx tsx src/scripts/run-connector.ts all
