@@ -42,6 +42,16 @@ export default function MentionsLegales() {
         </section>
 
         <section>
+          <h2 className="font-serif text-lg font-semibold text-ink-900 mb-2">Contact</h2>
+          <p>
+            Pour toute question, remarque ou signalement, vous pouvez nous contacter à l'adresse :{" "}
+            <a href="mailto:empirisme.citoyen@gmail.com" className="underline">
+              empirisme.citoyen@gmail.com
+            </a>
+          </p>
+        </section>
+
+        <section>
           <h2 className="font-serif text-lg font-semibold text-ink-900 mb-2">Propriété intellectuelle</h2>
           <p>
             Les données indexées proviennent de sources publiques ouvertes (Open Data).
